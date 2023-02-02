@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package com.pim.action;
+
+import "kalix/annotations.proto";
+import "com/pim/domain/product_domain.proto";
+import "google/api/annotations.proto";
+
+service ProductStream {
+    option (kalix.codegen) = {
+        action: {}
+      };
+      option (kalix.service).eventing.in = {
+        event_sourced_entity: "products"
+        ignore_unknown: true
+      };
+      option (kalix.service).eventing.out.direct.event_stream_id = "products_events";
+      // limit access to only other services in same project
+      option (kalix.service).acl.allow = { service: "*" };
+    
+      // transform methods for turning internal event types to public API
+      rpc TransformProductCreated(domain.ProductCreated) returns (domain.ProductCreated) { }
+}
